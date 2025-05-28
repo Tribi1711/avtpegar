@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pega a Aitor</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: Arial, sans-serif;
+            touch-action: manipulation;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #aitor {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            user-select: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            color: #333;
+            background-color: rgba(255,255,255,0.7);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        #weapons {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+        
+        .weapon {
+            width: 70px;
+            height: 70px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        
+        .weapon:hover, .weapon:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .weapon.selected {
+            background-color: #ffcc00;
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px rgba(255,204,0,0.5);
+        }
+        
+        #damageEffect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+        
+        #blood {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="score">Golpes: 0</div>
+        <img id="aitor" src="images.jpeg" alt="Aitor">
+        <div id="blood"></div>
+        
+        <div id="weapons">
+            <div class="weapon selected" data-damage="1">👊</div>
+            <div class="weapon" data-damage="2">👋</div>
+            <div class="weapon" data-damage="3">🔨</div>
+            <div class="weapon" data-damage="5">🔪</div>
+            <div class="weapon" data-damage="8">💣</div>
+            <div class="weapon" data-damage="10">🔫</div>
+        </div>
+    </div>
+
+    <script>
+        const aitor = document.getElementById('aitor');
+        const scoreElement = document.getElementById('score');
+        const weapons = document.querySelectorAll('.weapon');
+        const gameContainer = document.getElementById('gameContainer');
+        const blood = document.getElementById('blood');
+        
+        let score = 0;
+        let currentDamage = 1;
+        let hitCount = 0;
+        
+        // Golpea a Aitor
+        function hitAitor(e) {
+            // Crear efecto de daño
+            const damageEffect = document.createElement('div');
+            damageEffect.id = 'damageEffect';
+            damageEffect.textContent = `-${currentDamage}`;
+            damageEffect.style.left = `${e.clientX - 20}px`;
+            damageEffect.style.top = `${e.clientY - 20}px`;
+            gameContainer.appendChild(damageEffect);
+            
+            // Actualizar puntuación
+            score += currentDamage;
+            hitCount++;
+            scoreElement.textContent = `Golpes: ${score}`;
+            
+            // Efecto visual al golpear
+            aitor.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            
+            // Efecto de sangre cada 5 golpes
+            if (hitCount % 5 === 0) {
+                blood.style.opacity = '0.3';
+                blood.style.background = 'radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%)';
+                blood.style.backgroundPosition = `${e.clientX - window.innerWidth/2}px ${e.clientY - window.innerHeight/2}px`;
+                setTimeout(() => {
+                    blood.style.opacity = '0';
+                }, 500);
+            }
+            
+            setTimeout(() => {
+                aitor.style.transform = 'translate(-50%, -50%) scale(1)';
+                
+                // Eliminar efecto de daño después de la animación
+                if (damageEffect.parentNode) {
+                    damageEffect.parentNode.removeChild(damageEffect);
+                }
+            }, 100);
+            
+            // Rotación aleatoria para variedad
+            const rotation = (Math.random() * 20) - 10;
+            aitor.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0.9)`;
+        }
+        
+        // Seleccionar arma
+        weapons.forEach(weapon => {
+            weapon.addEventListener('click', () => {
+                currentDamage = parseInt(weapon.getAttribute('data-damage'));
+                
+                // Resaltar arma seleccionada
+                weapons.forEach(w => w.classList.remove('selected'));
+                weapon.classList.add('selected');
+            });
+        });
+        
+        // Event listeners para ratón y pantalla táctil
+        aitor.addEventListener('click', hitAitor);
+        aitor.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const simulatedEvent = {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            };
+            hitAitor(simulatedEvent);
+        }, {passive: false});
+        
+        // Efecto inicial de sangre transparente
+        blood.style.background = 'radial-gradient(circle, rgba(255,0,0,0) 0%, rgba(255,0,0,0) 100%)';
+    </script>
+</body>
+</html>
