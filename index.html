@@ -1,206 +1,1136 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pega a Aitor</title>
+    <title>¡Pega a Aitor! - Cookie Clicker Style</title>
     <style>
+        :root {
+            --color-primary: #FF6B6B;
+            --color-secondary: #4ECDC4;
+            --color-dark: #292F36;
+            --color-light: #F7FFF7;
+        }
+        
         body {
             margin: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            font-family: Arial, sans-serif;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-dark);
+            color: var(--color-light);
+            overflow-x: hidden;
             touch-action: manipulation;
         }
         
-        #gameContainer {
+        #header {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            z-index: 10;
+        }
+        
+        #title {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        #gameContainer {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        
+        #leftPanel {
+            width: 70%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        #aitorContainer {
+            position: relative;
+            margin-bottom: 30px;
         }
         
         #aitor {
-            position: absolute;
-            width: 200px;
-            height: 200px;
+            width: 250px;
+            height: 250px;
             cursor: pointer;
-            user-select: none;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
+            border: 5px solid var(--color-primary);
+            background-color: white;
+        }
+        
+        #scoreContainer {
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         #score {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 28px;
-            color: #333;
-            background-color: rgba(255,255,255,0.7);
-            padding: 10px 20px;
-            border-radius: 50px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-secondary);
+            margin: 0;
+            text-align: center;
         }
         
-        #weapons {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            padding: 0 20px;
+        #scorePerSecond {
+            font-size: 1rem;
+            color: #AAA;
+            margin: 5px 0 0;
+            text-align: center;
         }
         
-        .weapon {
-            width: 70px;
-            height: 70px;
-            background-color: white;
-            border-radius: 50%;
+        #rightPanel {
+            width: 30%;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .panelTitle {
+            font-size: 1.5rem;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+        
+        .upgrade, .achievement {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
             display: flex;
-            justify-content: center;
             align-items: center;
+            transition: all 0.3s;
             cursor: pointer;
-            font-size: 30px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
         
-        .weapon:hover, .weapon:active {
-            transform: scale(1.1);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        .upgrade:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
         }
         
-        .weapon.selected {
-            background-color: #ffcc00;
-            transform: scale(1.1);
-            box-shadow: 0 0 0 4px rgba(255,204,0,0.5);
+        .upgrade-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+        }
+        
+        .upgrade-info {
+            flex: 1;
+        }
+        
+        .upgrade-name {
+            font-weight: bold;
+            margin: 0 0 5px;
+        }
+        
+        .upgrade-description {
+            font-size: 0.8rem;
+            margin: 0;
+            color: #DDD;
+        }
+        
+        .upgrade-price {
+            font-weight: bold;
+            color: var(--color-secondary);
+        }
+        
+        .locked {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .unlocked {
+            background: linear-gradient(90deg, rgba(255,215,0,0.2), transparent);
+            border-left: 4px solid gold;
         }
         
         #damageEffect {
             position: absolute;
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: bold;
             color: red;
             pointer-events: none;
             animation: floatUp 1s forwards;
-            opacity: 0;
+            text-shadow: 0 0 5px black;
+            z-index: 5;
         }
         
         @keyframes floatUp {
             0% {
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-50px);
+                transform: translateY(-100px) scale(0.5);
                 opacity: 0;
             }
         }
         
-        #blood {
+        #clickEffect {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8), transparent 70%);
+            border-radius: 50%;
             pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: clickPulse 0.5s forwards;
+            z-index: 2;
+        }
+        
+        @keyframes clickPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        #achievementsContainer {
+            margin-top: 30px;
+        }
+        
+        .achievement {
+            cursor: default;
+        }
+        
+        .achievement.unlocked {
+            background: linear-gradient(90deg, rgba(255,215,0,0.3), transparent);
+        }
+        
+        .achievement-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: gold;
+        }
+        
+        .tab {
+            display: none;
+        }
+        
+        .tab.active {
+            display: block;
+        }
+        
+        #tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+        
+        .tab-button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+        }
+        
+        .tab-button.active {
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--color-primary);
+        }
+        
+        #specialAttacks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .specialAttack {
+            background: rgba(255,0,0,0.3);
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: calc(50% - 20px);
+        }
+        
+        .specialAttack:hover {
+            background: rgba(255,0,0,0.5);
+            transform: scale(1.05);
+        }
+        
+        .specialAttack:active {
+            transform: scale(0.95);
+        }
+        
+        .specialAttack-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .specialAttack-cooldown {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            margin-top: 5px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .specialAttack-cooldown-bar {
+            height: 100%;
+            background: var(--color-secondary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        #aitorHealth {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,0,0,0.3);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        #aitorHealthBar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #FF0000, #FF6B6B);
+            transition: width 0.3s;
+        }
+        
+        #aitorLevel {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #AAA;
+        }
+        
+        #criticalHit {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: bold;
+            color: red;
+            text-shadow: 0 0 20px yellow;
+            z-index: 100;
             opacity: 0;
-            transition: opacity 0.3s;
+            pointer-events: none;
+            animation: criticalAnimation 1s;
+        }
+        
+        @keyframes criticalAnimation {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            #gameContainer {
+                flex-direction: column;
+            }
+            
+            #leftPanel, #rightPanel {
+                width: 100%;
+            }
+            
+            #rightPanel {
+                height: auto;
+                max-height: 400px;
+            }
         }
     </style>
 </head>
 <body>
+    <div id="header">
+        <h1 id="title">¡Pega a Aitor!</h1>
+    </div>
+    
     <div id="gameContainer">
-        <div id="score">Golpes: 0</div>
-        <img id="aitor" src="images.jpeg" alt="Aitor">
-        <div id="blood"></div>
+        <div id="leftPanel">
+            <div id="aitorContainer">
+                <img id="aitor" src="images.jpeg" alt="Aitor">
+            </div>
+            
+            <div id="scoreContainer">
+                <h2 id="score">0 golpes</h2>
+                <p id="scorePerSecond">0 golpes/segundo</p>
+            </div>
+            
+            <div id="aitorHealth">
+                <div id="aitorHealthBar"></div>
+            </div>
+            <p id="aitorLevel">Nivel 1 - Aitor Novato</p>
+            
+            <div id="specialAttacks">
+                <div class="specialAttack" data-damage="50" data-cooldown="10" id="special1">
+                    <div class="specialAttack-icon">💥</div>
+                    <div>Golpe Crítico</div>
+                    <div class="specialAttack-cooldown">
+                        <div class="specialAttack-cooldown-bar"></div>
+                    </div>
+                </div>
+                
+                <div class="specialAttack" data-damage="100" data-cooldown="30" id="special2">
+                    <div class="specialAttack-icon">🔥</div>
+                    <div>Ataque Fuego</div>
+                    <div class="specialAttack-cooldown">
+                        <div class="specialAttack-cooldown-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <div id="weapons">
-            <div class="weapon selected" data-damage="1">👊</div>
-            <div class="weapon" data-damage="2">👋</div>
-            <div class="weapon" data-damage="3">🔨</div>
-            <div class="weapon" data-damage="5">🔪</div>
-            <div class="weapon" data-damage="8">💣</div>
-            <div class="weapon" data-damage="10">🔫</div>
+        <div id="rightPanel">
+            <div id="tabs">
+                <button class="tab-button active" data-tab="upgrades">Mejoras</button>
+                <button class="tab-button" data-tab="achievements">Logros</button>
+                <button class="tab-button" data-tab="stats">Estadísticas</button>
+            </div>
+            
+            <div id="upgrades" class="tab active">
+                <h3 class="panelTitle">Mejoras</h3>
+                
+                <div class="upgrade" data-id="1" data-price="50" data-multiplier="0.1" data-unlocked="false">
+                    <div class="upgrade-icon">👊</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Puño Mejorado</p>
+                        <p class="upgrade-description">Aumenta el daño de tus golpes en 0.1x</p>
+                    </div>
+                    <div class="upgrade-price">50</div>
+                </div>
+                
+                <div class="upgrade locked" data-id="2" data-price="200" data-multiplier="0.5" data-unlocked="false">
+                    <div class="upgrade-icon">👨‍🍳</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Chef Aitor</p>
+                        <p class="upgrade-description">Aitor cocina para ti (+0.5 golpes/seg)</p>
+                    </div>
+                    <div class="upgrade-price">200</div>
+                </div>
+                
+                <div class="upgrade locked" data-id="3" data-price="500" data-multiplier="1" data-unlocked="false">
+                    <div class="upgrade-icon">👯</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Clon de Aitor</p>
+                        <p class="upgrade-description">Un clon ayuda a golpear (+1 golpe/seg)</p>
+                    </div>
+                    <div class="upgrade-price">500</div>
+                </div>
+                
+                <div class="upgrade locked" data-id="4" data-price="1000" data-multiplier="2" data-unlocked="false">
+                    <div class="upgrade-icon">🏭</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Fábrica de Aitors</p>
+                        <p class="upgrade-description">Producción en masa (+2 golpes/seg)</p>
+                    </div>
+                    <div class="upgrade-price">1,000</div>
+                </div>
+                
+                <div class="upgrade locked" data-id="5" data-price="5000" data-multiplier="5" data-unlocked="false">
+                    <div class="upgrade-icon">🌎</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Aitor Global</p>
+                        <p class="upgrade-description">Aitors en todo el mundo (+5 golpes/seg)</p>
+                    </div>
+                    <div class="upgrade-price">5,000</div>
+                </div>
+                
+                <div class="upgrade locked" data-id="6" data-price="10000" data-multiplier="10" data-unlocked="false">
+                    <div class="upgrade-icon">🚀</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Aitor Espacial</p>
+                        <p class="upgrade-description">Aitors en el espacio (+10 golpes/seg)</p>
+                    </div>
+                    <div class="upgrade-price">10,000</div>
+                </div>
+            </div>
+            
+            <div id="achievements" class="tab">
+                <h3 class="panelTitle">Logros</h3>
+                
+                <div class="achievement locked" data-id="1" data-required="10">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Novato Golpeador</p>
+                        <p class="upgrade-description">Da 10 golpes a Aitor</p>
+                    </div>
+                </div>
+                
+                <div class="achievement locked" data-id="2" data-required="100">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Aprendiz del Dolor</p>
+                        <p class="upgrade-description">Da 100 golpes a Aitor</p>
+                    </div>
+                </div>
+                
+                <div class="achievement locked" data-id="3" data-required="1000">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Maestro Torturador</p>
+                        <p class="upgrade-description">Da 1,000 golpes a Aitor</p>
+                    </div>
+                </div>
+                
+                <div class="achievement locked" data-id="4" data-required="10000">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Leyenda de Aitor</p>
+                        <p class="upgrade-description">Da 10,000 golpes a Aitor</p>
+                    </div>
+                </div>
+                
+                <div class="achievement locked" data-id="5" data-required="1">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Primera Compra</p>
+                        <p class="upgrade-description">Compra tu primera mejora</p>
+                    </div>
+                </div>
+                
+                <div class="achievement locked" data-id="6" data-required="100">
+                    <div class="achievement-icon">🔓</div>
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Crítico</p>
+                        <p class="upgrade-description">Realiza un golpe crítico</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="stats" class="tab">
+                <h3 class="panelTitle">Estadísticas</h3>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Golpes Totales</p>
+                        <p class="upgrade-description" id="totalHits">0</p>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Golpes por Click</p>
+                        <p class="upgrade-description" id="clickPower">1</p>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Golpes por Segundo</p>
+                        <p class="upgrade-description" id="hitsPerSecond">0</p>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Mejoras Compradas</p>
+                        <p class="upgrade-description" id="upgradesBought">0</p>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Logros Desbloqueados</p>
+                        <p class="upgrade-description" id="achievementsUnlocked">0</p>
+                    </div>
+                </div>
+                
+                <div class="achievement">
+                    <div class="upgrade-info">
+                        <p class="upgrade-name">Nivel de Aitor</p>
+                        <p class="upgrade-description" id="aitorLevelStat">1</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
+    
+    <div id="criticalHit">¡CRÍTICO!</div>
+    
     <script>
-        const aitor = document.getElementById('aitor');
-        const scoreElement = document.getElementById('score');
-        const weapons = document.querySelectorAll('.weapon');
-        const gameContainer = document.getElementById('gameContainer');
-        const blood = document.getElementById('blood');
-        
+        // Variables del juego
         let score = 0;
-        let currentDamage = 1;
-        let hitCount = 0;
+        let totalHits = 0;
+        let clickPower = 1;
+        let passiveIncome = 0;
+        let upgradesBought = 0;
+        let achievementsUnlocked = 0;
+        let aitorLevel = 1;
+        let aitorHealth = 100;
+        let maxAitorHealth = 100;
+        let criticalChance = 0.05; // 5% de chance de golpe crítico
+        let criticalMultiplier = 2;
         
-        // Golpea a Aitor
+        // Mejoras compradas
+        const upgrades = {};
+        
+        // Logros
+        const achievements = {
+            1: false, // 10 golpes
+            2: false, // 100 golpes
+            3: false, // 1,000 golpes
+            4: false, // 10,000 golpes
+            5: false, // Primera compra
+            6: false  // Primer crítico
+        };
+        
+        // Cooldowns de ataques especiales
+        const specialAttacksCooldown = {
+            special1: 0,
+            special2: 0
+        };
+        
+        // Elementos del DOM
+        const scoreElement = document.getElementById('score');
+        const scorePerSecondElement = document.getElementById('scorePerSecond');
+        const aitorElement = document.getElementById('aitor');
+        const aitorHealthBar = document.getElementById('aitorHealthBar');
+        const aitorLevelElement = document.getElementById('aitorLevel');
+        const criticalHitElement = document.getElementById('criticalHit');
+        
+        // Inicializar el juego
+        function initGame() {
+            loadGame();
+            setupEventListeners();
+            updateUI();
+            
+            // Bucle principal del juego
+            setInterval(gameLoop, 1000);
+            setInterval(updateCooldowns, 100);
+        }
+        
+        // Bucle del juego
+        function gameLoop() {
+            // Generar ingresos pasivos
+            addScore(passiveIncome);
+            totalHits += passiveIncome;
+            
+            // Actualizar UI
+            updateUI();
+            saveGame();
+        }
+        
+        // Actualizar cooldowns
+        function updateCooldowns() {
+            Object.keys(specialAttacksCooldown).forEach(key => {
+                if (specialAttacksCooldown[key] > 0) {
+                    specialAttacksCooldown[key] -= 0.1;
+                    if (specialAttacksCooldown[key] < 0) specialAttacksCooldown[key] = 0;
+                    
+                    const cooldownElement = document.querySelector(`#${key} .specialAttack-cooldown-bar`);
+                    if (cooldownElement) {
+                        const cooldownTime = parseInt(document.getElementById(key).getAttribute('data-cooldown'));
+                        const percentage = (specialAttacksCooldown[key] / cooldownTime) * 100;
+                        cooldownElement.style.width = `${100 - percentage}%`;
+                    }
+                }
+            });
+        }
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Click en Aitor
+            aitorElement.addEventListener('click', hitAitor);
+            aitorElement.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const simulatedEvent = {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                };
+                hitAitor(simulatedEvent);
+            }, {passive: false});
+            
+            // Ataques especiales
+            document.querySelectorAll('.specialAttack').forEach(attack => {
+                attack.addEventListener('click', useSpecialAttack);
+            });
+            
+            // Mejoras
+            document.querySelectorAll('.upgrade').forEach(upgrade => {
+                upgrade.addEventListener('click', buyUpgrade);
+            });
+            
+            // Tabs
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', switchTab);
+            });
+        }
+        
+        // Golpear a Aitor
         function hitAitor(e) {
-            // Crear efecto de daño
-            const damageEffect = document.createElement('div');
-            damageEffect.id = 'damageEffect';
-            damageEffect.textContent = `-${currentDamage}`;
-            damageEffect.style.left = `${e.clientX - 20}px`;
-            damageEffect.style.top = `${e.clientY - 20}px`;
-            gameContainer.appendChild(damageEffect);
+            let damage = clickPower;
+            let isCritical = false;
             
+            // Chance de golpe crítico
+            if (Math.random() < criticalChance) {
+                damage = Math.floor(damage * criticalMultiplier);
+                isCritical = true;
+                showCriticalHit(e);
+                
+                // Logro de golpe crítico
+                if (!achievements[6]) {
+                    achievements[6] = true;
+                    achievementsUnlocked++;
+                    unlockAchievement(6);
+                }
+            }
+            
+            // Aplicar daño
+            addScore(damage);
+            totalHits += damage;
+            aitorHealth -= damage;
+            
+            // Efecto visual
+            showDamageEffect(e, damage, isCritical);
+            showClickEffect(e);
+            animateAitorHit();
+            
+            // Actualizar barra de salud
+            updateAitorHealth();
+            
+            // Verificar si Aitor ha sido "derrotado" para subir de nivel
+            if (aitorHealth <= 0) {
+                levelUpAitor();
+            }
+            
+            // Verificar logros por cantidad de golpes
+            checkHitAchievements();
+            
+            // Actualizar UI
+            updateUI();
+            saveGame();
+        }
+        
+        // Ataque especial
+        function useSpecialAttack(e) {
+            const attackId = e.currentTarget.id;
+            const damage = parseInt(e.currentTarget.getAttribute('data-damage'));
+            const cooldown = parseInt(e.currentTarget.getAttribute('data-cooldown'));
+            
+            if (specialAttacksCooldown[attackId] <= 0) {
+                // Aplicar daño
+                addScore(damage);
+                totalHits += damage;
+                aitorHealth -= damage;
+                
+                // Efecto visual
+                showDamageEffect({clientX: window.innerWidth/2, clientY: window.innerHeight/2}, damage, true);
+                animateAitorHit(true);
+                
+                // Actualizar barra de salud
+                updateAitorHealth();
+                
+                // Verificar si Aitor ha sido "derrotado" para subir de nivel
+                if (aitorHealth <= 0) {
+                    levelUpAitor();
+                }
+                
+                // Iniciar cooldown
+                specialAttacksCooldown[attackId] = cooldown;
+                
+                // Actualizar UI
+                updateUI();
+                saveGame();
+            }
+        }
+        
+        // Subir de nivel a Aitor
+        function levelUpAitor() {
+            aitorLevel++;
+            maxAitorHealth = Math.floor(100 * Math.pow(1.3, aitorLevel - 1));
+            aitorHealth = maxAitorHealth;
+            
+            // Actualizar texto del nivel
+            let levelText = `Nivel ${aitorLevel} - `;
+            if (aitorLevel < 5) levelText += "Aitor Novato";
+            else if (aitorLevel < 10) levelText += "Aitor Intermedio";
+            else if (aitorLevel < 20) levelText += "Aitor Experto";
+            else if (aitorLevel < 30) levelText += "Aitor Máster";
+            else levelText += "Aitor Legendario";
+            
+            aitorLevelElement.textContent = levelText;
+            
+            // Efecto visual
+            showLevelUpEffect();
+        }
+        
+        // Comprar mejora
+        function buyUpgrade(e) {
+            const upgradeElement = e.currentTarget;
+            if (upgradeElement.classList.contains('locked')) return;
+            
+            const id = upgradeElement.getAttribute('data-id');
+            const price = parseInt(upgradeElement.getAttribute('data-price'));
+            const multiplier = parseFloat(upgradeElement.getAttribute('data-multiplier'));
+            
+            if (score >= price) {
+                // Comprar mejora
+                score -= price;
+                upgrades[id] = true;
+                upgradesBought++;
+                
+                // Aplicar efectos de la mejora
+                if (id == "1") {
+                    clickPower += multiplier;
+                } else {
+                    passiveIncome += multiplier;
+                }
+                
+                // Desbloquear siguiente mejora si existe
+                const nextUpgrade = document.querySelector(`.upgrade[data-id="${parseInt(id)+1}"]`);
+                if (nextUpgrade) {
+                    nextUpgrade.classList.remove('locked');
+                }
+                
+                // Marcar como comprada
+                upgradeElement.classList.add('unlocked');
+                upgradeElement.style.cursor = 'default';
+                
+                // Logro de primera compra
+                if (!achievements[5]) {
+                    achievements[5] = true;
+                    achievementsUnlocked++;
+                    unlockAchievement(5);
+                }
+                
+                // Actualizar UI
+                updateUI();
+                saveGame();
+            }
+        }
+        
+        // Desbloquear logro
+        function unlockAchievement(id) {
+            const achievementElement = document.querySelector(`.achievement[data-id="${id}"]`);
+            if (achievementElement) {
+                achievementElement.classList.remove('locked');
+                achievementElement.classList.add('unlocked');
+                achievementElement.querySelector('.achievement-icon').textContent = '🏆';
+                
+                // Mostrar notificación
+                const achievementName = achievementElement.querySelector('.upgrade-name').textContent;
+                showNotification(`¡Logro desbloqueado: ${achievementName}!`);
+            }
+        }
+        
+        // Verificar logros por cantidad de golpes
+        function checkHitAchievements() {
+            if (totalHits >= 10 && !achievements[1]) {
+                achievements[1] = true;
+                achievementsUnlocked++;
+                unlockAchievement(1);
+            }
+            if (totalHits >= 100 && !achievements[2]) {
+                achievements[2] = true;
+                achievementsUnlocked++;
+                unlockAchievement(2);
+            }
+            if (totalHits >= 1000 && !achievements[3]) {
+                achievements[3] = true;
+                achievementsUnlocked++;
+                unlockAchievement(3);
+            }
+            if (totalHits >= 10000 && !achievements[4]) {
+                achievements[4] = true;
+                achievementsUnlocked++;
+                unlockAchievement(4);
+            }
+        }
+        
+        // Cambiar de pestaña
+        function switchTab(e) {
+            const tabId = e.currentTarget.getAttribute('data-tab');
+            
+            // Actualizar botones de pestaña
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            e.currentTarget.classList.add('active');
+            
+            // Mostrar pestaña seleccionada
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // Añadir puntos
+        function addScore(amount) {
+            score += amount;
+        }
+        
+        // Actualizar UI
+        function updateUI() {
             // Actualizar puntuación
-            score += currentDamage;
-            hitCount++;
-            scoreElement.textContent = `Golpes: ${score}`;
+            scoreElement.textContent = `${formatNumber(score)} golpes`;
+            scorePerSecondElement.textContent = `${passiveIncome} golpes/segundo`;
             
-            // Efecto visual al golpear
-            aitor.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            // Actualizar estadísticas
+            document.getElementById('totalHits').textContent = formatNumber(totalHits);
+            document.getElementById('clickPower').textContent = clickPower;
+            document.getElementById('hitsPerSecond').textContent = passiveIncome;
+            document.getElementById('upgradesBought').textContent = upgradesBought;
+            document.getElementById('achievementsUnlocked').textContent = `${achievementsUnlocked}/6`;
+            document.getElementById('aitorLevelStat').textContent = aitorLevel;
             
-            // Efecto de sangre cada 5 golpes
-            if (hitCount % 5 === 0) {
-                blood.style.opacity = '0.3';
-                blood.style.background = 'radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%)';
-                blood.style.backgroundPosition = `${e.clientX - window.innerWidth/2}px ${e.clientY - window.innerHeight/2}px`;
-                setTimeout(() => {
-                    blood.style.opacity = '0';
-                }, 500);
+            // Actualizar precios de mejoras
+            document.querySelectorAll('.upgrade').forEach(upgrade => {
+                const price = parseInt(upgrade.getAttribute('data-price'));
+                upgrade.querySelector('.upgrade-price').textContent = formatNumber(price);
+                
+                // Resaltar mejoras que se pueden comprar
+                if (!upgrade.classList.contains('unlocked') {
+                    if (score >= price) {
+                        upgrade.style.boxShadow = '0 0 10px var(--color-secondary)';
+                    } else {
+                        upgrade.style.boxShadow = 'none';
+                    }
+                }
+            });
+        }
+        
+        // Actualizar barra de salud de Aitor
+        function updateAitorHealth() {
+            const percentage = (aitorHealth / maxAitorHealth) * 100;
+            aitorHealthBar.style.width = `${percentage}%`;
+        }
+        
+        // Mostrar efecto de daño
+        function showDamageEffect(pos, damage, isCritical) {
+            const effect = document.createElement('div');
+            effect.className = 'damageEffect';
+            effect.textContent = `-${damage}`;
+            effect.style.left = `${pos.clientX - 20}px`;
+            effect.style.top = `${pos.clientY - 20}px`;
+            
+            if (isCritical) {
+                effect.style.color = 'gold';
+                effect.style.fontSize = '2rem';
+                effect.style.textShadow = '0 0 10px red';
+            }
+            
+            document.body.appendChild(effect);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                effect.remove();
+            }, 1000);
+        }
+        
+        // Mostrar efecto de click
+        function showClickEffect(pos) {
+            const effect = document.createElement('div');
+            effect.id = 'clickEffect';
+            effect.style.left = `${pos.clientX}px`;
+            effect.style.top = `${pos.clientY}px`;
+            document.body.appendChild(effect);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                effect.remove();
+            }, 500);
+        }
+        
+        // Mostrar golpe crítico
+        function showCriticalHit(pos) {
+            criticalHitElement.style.left = `${pos.clientX}px`;
+            criticalHitElement.style.top = `${pos.clientY}px`;
+            criticalHitElement.style.opacity = '1';
+            
+            // Animación
+            setTimeout(() => {
+                criticalHitElement.style.opacity = '0';
+            }, 1000);
+        }
+        
+        // Mostrar subida de nivel
+        function showLevelUpEffect() {
+            const effect = document.createElement('div');
+            effect.className = 'damageEffect';
+            effect.textContent = `¡Nivel ${aitorLevel}!`;
+            effect.style.left = '50%';
+            effect.style.top = '50%';
+            effect.style.transform = 'translate(-50%, -50%)';
+            effect.style.color = 'gold';
+            effect.style.fontSize = '2rem';
+            effect.style.textShadow = '0 0 10px var(--color-primary)';
+            effect.style.zIndex = '100';
+            document.body.appendChild(effect);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                effect.remove();
+            }, 2000);
+        }
+        
+        // Mostrar notificación
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'achievement';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'slideIn 0.5s, slideOut 0.5s 2.5s';
+            notification.innerHTML = `
+                <div class="achievement-icon">🎉</div>
+                <div class="upgrade-info">
+                    <p class="upgrade-name">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Eliminar después de la animación
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Animación de golpe a Aitor
+        function animateAitorHit(bigHit = false) {
+            if (bigHit) {
+                aitorElement.style.transform = 'scale(0.8) rotate(10deg)';
+            } else {
+                aitorElement.style.transform = 'scale(0.95)';
             }
             
             setTimeout(() => {
-                aitor.style.transform = 'translate(-50%, -50%) scale(1)';
-                
-                // Eliminar efecto de daño después de la animación
-                if (damageEffect.parentNode) {
-                    damageEffect.parentNode.removeChild(damageEffect);
-                }
-            }, 100);
-            
-            // Rotación aleatoria para variedad
-            const rotation = (Math.random() * 20) - 10;
-            aitor.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0.9)`;
+                aitorElement.style.transform = 'scale(1) rotate(0deg)';
+            }, 200);
         }
         
-        // Seleccionar arma
-        weapons.forEach(weapon => {
-            weapon.addEventListener('click', () => {
-                currentDamage = parseInt(weapon.getAttribute('data-damage'));
-                
-                // Resaltar arma seleccionada
-                weapons.forEach(w => w.classList.remove('selected'));
-                weapon.classList.add('selected');
-            });
-        });
+        // Formatear números
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
         
-        // Event listeners para ratón y pantalla táctil
-        aitor.addEventListener('click', hitAitor);
-        aitor.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const simulatedEvent = {
-                clientX: touch.clientX,
-                clientY: touch.clientY
+        // Guardar juego
+        function saveGame() {
+            const gameData = {
+                score,
+                totalHits,
+                clickPower,
+                passiveIncome,
+                upgradesBought,
+                achievementsUnlocked,
+                aitorLevel,
+                aitorHealth,
+                maxAitorHealth,
+                upgrades,
+                achievements
             };
-            hitAitor(simulatedEvent);
-        }, {passive: false});
+            
+            localStorage.setItem('pegaAitorSave', JSON.stringify(gameData));
+        }
         
-        // Efecto inicial de sangre transparente
-        blood.style.background = 'radial-gradient(circle, rgba(255,0,0,0) 0%, rgba(255,0,0,0) 100%)';
+        // Cargar juego
+        function loadGame() {
+            const savedData = localStorage.getItem('pegaAitorSave');
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                
+                score = gameData.score || 0;
+                totalHits = gameData.totalHits || 0;
+                clickPower = gameData.clickPower || 1;
+                passiveIncome = gameData.passiveIncome || 0;
+                upgradesBought = gameData.upgradesBought || 0;
+                achievementsUnlocked = gameData.achievementsUnlocked || 0;
+                aitorLevel = gameData.aitorLevel || 1;
+                aitorHealth = gameData.aitorHealth || 100;
+                maxAitorHealth = gameData.maxAitorHealth || 100;
+                
+                // Cargar mejoras
+                if (gameData.upgrades) {
+                    Object.assign(upgrades, gameData.upgrades);
+                    
+                    // Desbloquear mejoras compradas
+                    Object.keys(upgrades).forEach(id => {
+                        if (upgrades[id]) {
+                            const upgradeElement = document.querySelector(`.upgrade[data-id="${id}"]`);
+                            if (upgradeElement) {
+                                upgradeElement.classList.add('unlocked');
+                                upgradeElement.classList.remove('locked');
+                                upgradeElement.style.cursor = 'default';
+                                
+                                // Desbloquear siguiente mejora
+                                const nextUpgrade = document.querySelector(`.upgrade[data-id="${parseInt(id)+1}"]`);
+                                if (nextUpgrade) {
+                                    nextUpgrade.classList.remove('locked');
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Cargar logros
+                if (gameData.achievements) {
+                    Object.assign(achievements, gameData.achievements);
+                    
+                    // Desbloquear logros conseguidos
+                    Object.keys(achievements).forEach(id => {
+                        if (achievements[id]) {
+                            unlockAchievement(id);
+                        }
+                    });
+                }
+                
+                // Actualizar nivel de Aitor
+                let levelText = `Nivel ${aitorLevel} - `;
+                if (aitorLevel < 5) levelText += "Aitor Novato";
+                else if (aitorLevel < 10) levelText += "Aitor Intermedio";
+                else if (aitorLevel < 20) levelText += "Aitor Experto";
+                else if (aitorLevel < 30) levelText += "Aitor Máster";
+                else levelText += "Aitor Legendario";
+                
+                aitorLevelElement.textContent = levelText;
+                updateAitorHealth();
+            }
+        }
+        
+        // Iniciar el juego cuando se cargue la página
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
