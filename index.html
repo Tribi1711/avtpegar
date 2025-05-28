@@ -467,15 +467,6 @@
             <div id="upgrades" class="tab active">
                 <h3 class="panelTitle">Mejoras</h3>
                 
-                <div class="upgrade" data-id="1" data-price="50" data-multiplier="0.1" data-unlocked="false">
-                    <div class="upgrade-icon">👊</div>
-                    <div class="upgrade-info">
-                        <p class="upgrade-name">Puño Mejorado</p>
-                        <p class="upgrade-description">Aumenta el daño base de tus golpes en 0.1</p>
-                    </div>
-                    <div class="upgrade-price">50</div>
-                </div>
-                
                 <div class="upgrade locked" data-id="2" data-price="200" data-multiplier="0.5" data-unlocked="false">
                     <div class="upgrade-icon">👨‍🍳</div>
                     <div class="upgrade-info">
@@ -628,8 +619,7 @@
         // Variables del juego
         let score = 0;
         let totalHits = 0;
-        let baseClickPower = 1;
-        let clickPowerMultiplier = 1;
+        let clickPower = 1;
         let passiveIncome = 0;
         let upgradesBought = 0;
         let achievementsUnlocked = 0;
@@ -665,11 +655,6 @@
         const aitorHealthBar = document.getElementById('aitorHealthBar');
         const aitorLevelElement = document.getElementById('aitorLevel');
         const criticalHitElement = document.getElementById('criticalHit');
-        
-        // Calcular el poder de click actual
-        function getClickPower() {
-            return baseClickPower * clickPowerMultiplier;
-        }
         
         // Inicializar el juego
         function initGame() {
@@ -742,7 +727,7 @@
         
         // Golpear a Aitor
         function hitAitor(e) {
-            let damage = getClickPower();
+            let damage = clickPower;
             let isCritical = false;
             
             // Chance de golpe crítico
@@ -853,14 +838,8 @@
                 upgrades[id] = true;
                 upgradesBought++;
                 
-                // Aplicar efectos de la mejora
-                if (id === "1") {
-                    // Mejora de puño: aumenta el multiplicador de daño
-                    clickPowerMultiplier += multiplier;
-                } else {
-                    // Otras mejoras: aumentan el ingreso pasivo
-                    passiveIncome += multiplier;
-                }
+                // Aplicar efectos de la mejora (solo ingresos pasivos ahora)
+                passiveIncome += multiplier;
                 
                 // Desbloquear siguiente mejora si existe
                 const nextUpgrade = document.querySelector(`.upgrade[data-id="${parseInt(id)+1}"]`);
@@ -953,7 +932,7 @@
             
             // Actualizar estadísticas
             document.getElementById('totalHits').textContent = formatNumber(totalHits);
-            document.getElementById('clickPower').textContent = getClickPower().toFixed(1);
+            document.getElementById('clickPower').textContent = clickPower;
             document.getElementById('hitsPerSecond').textContent = passiveIncome.toFixed(1);
             document.getElementById('upgradesBought').textContent = upgradesBought;
             document.getElementById('achievementsUnlocked').textContent = `${achievementsUnlocked}/6`;
@@ -1095,8 +1074,7 @@
             const gameData = {
                 score,
                 totalHits,
-                baseClickPower,
-                clickPowerMultiplier,
+                clickPower,
                 passiveIncome,
                 upgradesBought,
                 achievementsUnlocked,
@@ -1118,8 +1096,7 @@
                 
                 score = gameData.score || 0;
                 totalHits = gameData.totalHits || 0;
-                baseClickPower = gameData.baseClickPower || 1;
-                clickPowerMultiplier = gameData.clickPowerMultiplier || 1;
+                clickPower = gameData.clickPower || 1;
                 passiveIncome = gameData.passiveIncome || 0;
                 upgradesBought = gameData.upgradesBought || 0;
                 achievementsUnlocked = gameData.achievementsUnlocked || 0;
