@@ -425,7 +425,7 @@
     <div id="gameContainer">
         <div id="leftPanel">
             <div id="aitorContainer">
-                <img id="aitor" src="https://via.placeholder.com/250" alt="Aitor">
+                <img id="aitor" src="images.jpeg" alt="Aitor">
             </div>
             
             <div id="scoreContainer">
@@ -471,7 +471,7 @@
                     <div class="upgrade-icon">👊</div>
                     <div class="upgrade-info">
                         <p class="upgrade-name">Puño Mejorado</p>
-                        <p class="upgrade-description">Aumenta el daño de tus golpes en 0.1x</p>
+                        <p class="upgrade-description">Aumenta el daño base de tus golpes en 0.1</p>
                     </div>
                     <div class="upgrade-price">50</div>
                 </div>
@@ -628,7 +628,8 @@
         // Variables del juego
         let score = 0;
         let totalHits = 0;
-        let clickPower = 1;
+        let baseClickPower = 1;
+        let clickPowerMultiplier = 1;
         let passiveIncome = 0;
         let upgradesBought = 0;
         let achievementsUnlocked = 0;
@@ -664,6 +665,11 @@
         const aitorHealthBar = document.getElementById('aitorHealthBar');
         const aitorLevelElement = document.getElementById('aitorLevel');
         const criticalHitElement = document.getElementById('criticalHit');
+        
+        // Calcular el poder de click actual
+        function getClickPower() {
+            return baseClickPower * clickPowerMultiplier;
+        }
         
         // Inicializar el juego
         function initGame() {
@@ -736,7 +742,7 @@
         
         // Golpear a Aitor
         function hitAitor(e) {
-            let damage = clickPower;
+            let damage = getClickPower();
             let isCritical = false;
             
             // Chance de golpe crítico
@@ -848,9 +854,11 @@
                 upgradesBought++;
                 
                 // Aplicar efectos de la mejora
-                if (id == "1") {
-                    clickPower += multiplier;
+                if (id === "1") {
+                    // Mejora de puño: aumenta el multiplicador de daño
+                    clickPowerMultiplier += multiplier;
                 } else {
+                    // Otras mejoras: aumentan el ingreso pasivo
                     passiveIncome += multiplier;
                 }
                 
@@ -945,7 +953,7 @@
             
             // Actualizar estadísticas
             document.getElementById('totalHits').textContent = formatNumber(totalHits);
-            document.getElementById('clickPower').textContent = clickPower.toFixed(1);
+            document.getElementById('clickPower').textContent = getClickPower().toFixed(1);
             document.getElementById('hitsPerSecond').textContent = passiveIncome.toFixed(1);
             document.getElementById('upgradesBought').textContent = upgradesBought;
             document.getElementById('achievementsUnlocked').textContent = `${achievementsUnlocked}/6`;
@@ -1087,7 +1095,8 @@
             const gameData = {
                 score,
                 totalHits,
-                clickPower,
+                baseClickPower,
+                clickPowerMultiplier,
                 passiveIncome,
                 upgradesBought,
                 achievementsUnlocked,
@@ -1109,7 +1118,8 @@
                 
                 score = gameData.score || 0;
                 totalHits = gameData.totalHits || 0;
-                clickPower = gameData.clickPower || 1;
+                baseClickPower = gameData.baseClickPower || 1;
+                clickPowerMultiplier = gameData.clickPowerMultiplier || 1;
                 passiveIncome = gameData.passiveIncome || 0;
                 upgradesBought = gameData.upgradesBought || 0;
                 achievementsUnlocked = gameData.achievementsUnlocked || 0;
